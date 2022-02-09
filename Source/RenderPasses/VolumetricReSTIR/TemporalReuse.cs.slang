@@ -37,7 +37,6 @@
  */
 
 #include "Utils/Math/MathConstants.slangh"
-//static const float kRayTMax = FLT_MAX;
 __exported import ReSTIRHelper;
 #include "HostDeviceSharedDefinitions.h"
 import Utils.Debug.PixelDebug;
@@ -96,7 +95,6 @@ void main(uint3 DTid : SV_DispatchThreadID)
         SampleGenerator sg = SampleGenerator.create(DTid.xy, gNumTotalRounds * gFrameCount + gRoundOffset); // prevent correlation with ray traicng shaders
 
         int selectedId = -1;
-        float selectedSamplePy = 0.f;
 
         int pixelId = getPixelID(pixelPos, gResolution);
 
@@ -113,7 +111,6 @@ void main(uint3 DTid : SV_DispatchThreadID)
         Reservoir output;
         if (gMISMethod == kMISTalbot) output = createNewReservoir();
         else output = taps[0];
-        selectedSamplePy = output.p_y;
 
     #if MAX_BOUNCES > 1
         int centerExtraBounceStartId = taps[0].extraBounceStartId;
@@ -162,7 +159,7 @@ void main(uint3 DTid : SV_DispatchThreadID)
             float3 p = cameraRay.origin + cameraRay.dir * reprojDepth;
 
             // find last frame world position if having velocity grid
-            if (gScene.volumeDesc.hasVelocity && gScene.volumeDesc.hasAnimation && reprojectUsingVolumeSample && gReprojectionMode != kReprojectionLinearNoVelocity)
+            if (gScene.volumeDesc.hasVelocity && gScene.volumeDesc.hasAnimation && reprojectUsingVolumeSample)
             {
                 float3 v = VelocityWorld(p) *  gScene.volumeDesc.velocityScale;
                 p = p - v;
@@ -356,7 +353,6 @@ void main(uint3 DTid : SV_DispatchThreadID)
             hasSelection |= isCurrentSelected;
             if (isCurrentSelected)
             {
-                selectedSamplePy = neighbor_py;
                 selectedId = i;
             }
         }

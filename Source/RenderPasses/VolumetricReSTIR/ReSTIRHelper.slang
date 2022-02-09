@@ -359,12 +359,10 @@ float3 evaluate_F_<ArrayDataProvider:IArrayDataProvider, ExternalVisibilityProvi
                         if (externalVis.getVisibility(bounceId + 1) != -1.f) scatterVisibility = externalVis.getVisibility(bounceId + 1);
                         else
                         {
-                            float curBounceVisibilityTStepScale = options.visibilityTStepScale * options.visibilityMipLevel;
-
                         #ifdef SURFACE_SCENE
-                            scatterVisibility = computeGeneralPathSpaceVisibility(true, !isLastVertexSurface, scatterRay, sg, options.visibilitySamples, options.visibilityMipLevel + mipLevelOffset, options.visibilityUseLinearSampler, options.visibilityTrackingMethod, curBounceVisibilityTStepScale, !isFinalShading);
+                            scatterVisibility = computeGeneralPathSpaceVisibility(true, !isLastVertexSurface, scatterRay, sg, options.visibilitySamples, options.visibilityMipLevel + mipLevelOffset, options.visibilityUseLinearSampler, options.visibilityTrackingMethod, options.visibilityTStepScale, !isFinalShading);
                         #else
-                            scatterVisibility = computeVisibility(scatterRay, sg, options.visibilitySamples, options.visibilityMipLevel + mipLevelOffset, options.visibilityUseLinearSampler, options.visibilityTrackingMethod, curBounceVisibilityTStepScale);
+                            scatterVisibility = computeVisibility(scatterRay, sg, options.visibilitySamples, options.visibilityMipLevel + mipLevelOffset, options.visibilityUseLinearSampler, options.visibilityTrackingMethod, options.visibilityTStepScale);
                         #endif
                             externalVis.putVisibility(bounceId + 1, scatterVisibility);
                         }
@@ -485,13 +483,10 @@ float3 evaluate_L_in_volume(MediumInteraction mi, int lightID, float2 lightUV, i
         if (lightVisibilityReuse) Tr = precomputedVisibility;
         else
         {
-            // TODO: reuse only if two sample points are similar enough
-            float curBounceLightingTStepScale = options.lightingTStepScale * options.lightingMipLevel;
-
 #ifdef SURFACE_SCENE
-            Tr = computeGeneralPathSpaceVisibility(nonBinary, true, shadowRay, sg, options.lightSamples, cullNonOpaqueGeometry ? options.lightingMipLevel + densityGridOffset : 0, options.lightingUseLinearSampler, options.lightingTrackingMethod, curBounceLightingTStepScale, cullNonOpaqueGeometry);
+            Tr = computeGeneralPathSpaceVisibility(nonBinary, true, shadowRay, sg, options.lightSamples, cullNonOpaqueGeometry ? options.lightingMipLevel + densityGridOffset : 0, options.lightingUseLinearSampler, options.lightingTrackingMethod, options.lightingTStepScale, cullNonOpaqueGeometry);
 #else
-            Tr = computeVisibility(shadowRay, sg, options.lightSamples, cullNonOpaqueGeometry ? options.lightingMipLevel + densityGridOffset : 0, options.lightingUseLinearSampler, options.lightingTrackingMethod, curBounceLightingTStepScale);
+            Tr = computeVisibility(shadowRay, sg, options.lightSamples, cullNonOpaqueGeometry ? options.lightingMipLevel + densityGridOffset : 0, options.lightingUseLinearSampler, options.lightingTrackingMethod, options.lightingTStepScale);
 #endif
             precomputedVisibility = Tr;
         }
@@ -544,8 +539,7 @@ float3 evaluate_L_on_surface(ShadingData shadingInfo, int lightID, float2 lightU
         if (lightVisibilityReuse) Tr = precomputedVisibility;
         else
         {
-            float curBounceLightingTStepScale = options.lightingTStepScale * options.lightingMipLevel;
-            Tr = computeGeneralPathSpaceVisibility(nonBinary, true, shadowRay, sg, options.lightSamples, options.lightingMipLevel + densityGridOffset, options.lightingUseLinearSampler, options.lightingTrackingMethod, curBounceLightingTStepScale, cullNonOpaqueGeometry);
+            Tr = computeGeneralPathSpaceVisibility(nonBinary, true, shadowRay, sg, options.lightSamples, options.lightingMipLevel + densityGridOffset, options.lightingUseLinearSampler, options.lightingTrackingMethod, options.lightingTStepScale, cullNonOpaqueGeometry);
 
             precomputedVisibility = Tr;
         }

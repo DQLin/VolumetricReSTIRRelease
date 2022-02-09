@@ -105,7 +105,7 @@ Ray WorldToMedium(Ray r, int mipLevel)
     float4x4 WorldToMediumMatrix = mul(gScene.volumeExternalWorldToModelMatrix, gvdb.invxform[mipLevel]);
     float4 o = mul(float4(r.origin, 1), WorldToMediumMatrix);
     float3 d = mul(float4(r.dir, 0), WorldToMediumMatrix).xyz;
-    return { o.xyz / o.w, d.xyz, r.tMin, r.tMax }; // TODO: get rid of division since grid xform can only be affine
+    return { o.xyz / o.w, d.xyz, r.tMin, r.tMax }; 
 }
 
 float3 WorldToMedium(float3 p, int mipLevel)
@@ -219,7 +219,6 @@ float3 ConvertTempToColor(float temp)
 float3 Emission(float3 p, bool isLastFrame=false)
 {
     if (!isLastFrame && !gScene.volumeDesc.hasEmission || isLastFrame && !gScene.volumeDesc.lastFrameHasEmission) return 0.f;
-    // TODO: use a transfer function
     float temp = Temperature(p, isLastFrame);
     return ConvertTempToColor(temp);
 }
@@ -232,7 +231,6 @@ float3 EmissionWorldSpace(float3 pW, bool isLastFrame = false)
     return ConvertTempToColor(temp);
 }
 
-// GridDensityMedium Method Definitions
 float Density(float3 p, int mipLevel) {
     if (any(p < gvdb.bmin[mipLevel]) || any(p >= gvdb.bmax[mipLevel])) return 0.f;
     return getValueAtPoint(gvdb, mipLevel, p, 0, gLinearSampler) * (gScene.volumeDesc.densityScaleFactorByScaling);

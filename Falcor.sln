@@ -9,8 +9,6 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Samples", "Samples", "{4B8EAC4B-FFDF-4CCA-A6FE-4505631E51EC}"
 EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Internal", "Internal", "{86B7A4CC-3EB2-4A6D-81C8-6778B6C22618}"
-EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Tools", "Tools", "{935D7586-B55D-431A-A0ED-338383DE1A1E}"
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "FalcorTest", "Source\Tools\FalcorTest\FalcorTest.vcxproj", "{20401FAD-6022-8EB7-2F78-41369B8F0F49}"

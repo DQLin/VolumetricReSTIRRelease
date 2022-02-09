@@ -215,14 +215,13 @@ Reservoir ComputeInitialSample(Ray primaryRay, float precomputedHitDistance, flo
                     bool shouldComputePHat = true;
 
                     bool shouldComputeLightVisibility = options.lightSamples == 0 ? false : shouldComputePHat;
-                    float curBounceLightingTStepScale = options.lightingTStepScale * options.lightingMipLevel;
 
                     #ifdef SURFACE_SCENE 
                     if (isSurfaceHit)
                     {
                         Ld = SampleDirectLightingSurface(sg, outLightPdf, shadingInfo,
                                 envMapSampler, emissiveSampler, options.useEnvironmentLights, options.useAnalyticLights, options.useEmissiveLights,
-                            shouldComputeLightVisibility, options.lightingMipLevel, options.lightingTrackingMethod, options.lightingUseLinearSampler, options.lightSamples, curBounceLightingTStepScale,
+                            shouldComputeLightVisibility, options.lightingMipLevel, options.lightingTrackingMethod, options.lightingUseLinearSampler, options.lightSamples, options.lightingTStepScale,
                             outReservoir.lightID, outReservoir.lightUV, outVisibility);
                     }
                     else
@@ -230,7 +229,7 @@ Reservoir ComputeInitialSample(Ray primaryRay, float precomputedHitDistance, flo
                     {
                         Ld = SampleDirectLighting(sg, outLightPdf, mi,
                             envMapSampler, emissiveSampler, options.useEnvironmentLights, options.useAnalyticLights, options.useEmissiveLights,
-                            shouldComputeLightVisibility, options.lightingMipLevel, options.lightingTrackingMethod, options.lightingUseLinearSampler, options.lightSamples, curBounceLightingTStepScale,
+                            shouldComputeLightVisibility, options.lightingMipLevel, options.lightingTrackingMethod, options.lightingUseLinearSampler, options.lightSamples, options.lightingTStepScale,
                             outReservoir.lightID, outReservoir.lightUV, outVisibility);
                     }
 

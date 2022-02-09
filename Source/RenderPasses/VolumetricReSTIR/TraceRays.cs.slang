@@ -65,7 +65,7 @@ static const int GROUP_SIZE_1D = 16;
 void main(uint3 DTid : SV_DispatchThreadID, uint3 GTId : SV_GroupThreadID, uint GroupIndex : SV_GroupIndex, uint3 GroupId : SV_GroupID)
 {
     uint2 launchIndex = DTid.xy;
-    printSetPixel(launchIndex);
+    //printSetPixel(launchIndex);
 
     SampleGenerator sg = SampleGenerator.create(launchIndex, gNumTotalRounds * gFrameCount);
 
@@ -78,17 +78,7 @@ void main(uint3 DTid : SV_DispatchThreadID, uint3 GTId : SV_GroupThreadID, uint 
 
     int reservoirId = launchIndex.y * gResolution.x + launchIndex.x;
 
-    float3 rayDir;
-
-    int2 randomCoarseSamplePixelOffset = 0;
-
-    #ifdef ANTIALIASING            
-        rayDir = gScene.camera.computeNonNormalizedRayDirPinhole(launchIndex, sampleNext2D(sg), gResolution);
-    #else
-        rayDir = gScene.camera.computeNonNormalizedRayDirPinhole(launchIndex, gResolution);
-    #endif
-
-    rayDir = normalize(rayDir);
+    float3 rayDir = normalize(gScene.camera.computeNonNormalizedRayDirPinhole(launchIndex, gResolution));
 
     Ray ray = { rayOrigin, rayDir, 0.f, kRayTMax };
 
@@ -113,19 +103,12 @@ void main(uint3 DTid : SV_DispatchThreadID, uint3 GTId : SV_GroupThreadID, uint 
     }
     else
     {
-        Ray primaryRay = ray;
-        // Compute $[\tmin, \tmax]$ interval of _ray_'s overlap with medium bounds
-        Bounds3f b = { float3(0, 0, 0), float3(1, 1, 1) };
-        float tMin, tMax;
-
-        int numInitialSamples = gNumInitialSamples; // TODO: add individual control for each level
-
         #if MAX_BOUNCES > 1
         ExtraBounceReservoir finalExtrabounceReservoir[MAX_BOUNCES - 1];
         #endif
         Reservoir finalReservoir = createNewReservoir();
 
-        int intialSampleRounds = (numInitialSamples + 3) / 4;
+        int intialSampleRounds = (gNumInitialSamples + 3) / 4;
 
         #ifdef SURFACE_SCENE
         // use vbuffer
@@ -133,9 +116,9 @@ void main(uint3 DTid : SV_DispatchThreadID, uint3 GTId : SV_GroupThreadID, uint 
         HitInfo hitInfo = { vItem.meshInstanceID, vItem.primitiveID, vItem.barycentrics, vItem.rayT };
 
         // or trace a new ray
-        //HitInfo hitInfo = FindSurfaceHit(primaryRay.origin, primaryRay.dir, 0, kRayTMax);
+        //HitInfo hitInfo = FindSurfaceHit(ray.origin, ray.dir, 0, kRayTMax);
 
-        primaryRay.tMax = hitInfo.rayT;
+        ray.tMax = hitInfo.rayT;
         #endif
 
         bool noReuse = gNoReuse;
@@ -147,17 +130,17 @@ void main(uint3 DTid : SV_DispatchThreadID, uint3 GTId : SV_GroupThreadID, uint 
             float pdfDists[MaxInitialSampleCount];
             float outTrs[MaxInitialSampleCount];
 
-            int roundSamples = roundId == intialSampleRounds - 1 ? (numInitialSamples - 4 * (intialSampleRounds - 1)) : 4;
+            int roundSamples = roundId == intialSampleRounds - 1 ? (gNumInitialSamples - 4 * (intialSampleRounds - 1)) : 4;
 
             if (!noReuse)
-                SampleMediumAnalyticGeneric(primaryRay, sg, gInitialSamplingOptions.visibilityUseLinearSampler, hitDistances, gInitialSamplingOptions.visibilityMipLevel, pdfDists, outTrs, roundSamples);
+                SampleMediumAnalyticGeneric(ray, sg, gInitialSamplingOptions.visibilityUseLinearSampler, hitDistances, gInitialSamplingOptions.visibilityMipLevel, pdfDists, outTrs, roundSamples);
 
             for (int sampleId = 0; sampleId < roundSamples; sampleId++)
             {
                 #if MAX_BOUNCES > 1
                 ExtraBounceReservoir extrabounceReservoir[MAX_BOUNCES - 1];
                 #endif
-                Reservoir outReservoir = ComputeInitialSample(primaryRay, hitDistances[sampleId], pdfDists[sampleId], outTrs[sampleId], gMaxBounces, numInitialSamples,
+                Reservoir outReservoir = ComputeInitialSample(ray, hitDistances[sampleId], pdfDists[sampleId], outTrs[sampleId], gMaxBounces, gNumInitialSamples,
                     sg, gInitialSamplingOptions, envMapSampler, emissiveSampler, gUseCoarserGridForIndirectBounce, gUseRussianRoulette, noReuse
                     #ifdef SURFACE_SCENE
                     , hitInfo

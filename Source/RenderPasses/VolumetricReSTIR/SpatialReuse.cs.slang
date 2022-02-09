@@ -117,13 +117,11 @@ void main(uint3 DTid : SV_DispatchThreadID)
 
     bool IsSelfBackground = true;
 
-    int centerReservoirId = pixelId;
-    Reservoir output = gInputReservoirs[centerReservoirId];
+    Reservoir output = gInputReservoirs[pixelId];
 
     #if MAX_BOUNCES > 1
     int centerExtraBounceStartId = output.extraBounceStartId;
     #endif
-    float selectedSamplePy = output.p_y;
 
     CameraRay cameraRay = gScene.camera.computeRayPinholeScaled(pixelPos, 1, 0.5f, gResolution);
 
@@ -133,7 +131,7 @@ void main(uint3 DTid : SV_DispatchThreadID)
 
     bool hasSelection = output.runningSum > 0.f;
 
-    ReservoirFeatures centerFeatures = gReservoirFeatureBuffer[centerReservoirId];
+    ReservoirFeatures centerFeatures = gReservoirFeatureBuffer[pixelId];
     if (centerFeatures.transmittance != 1.f)
     {
         IsSelfBackground = false;
@@ -147,8 +145,8 @@ void main(uint3 DTid : SV_DispatchThreadID)
 
     if (IsSelfBackground)
     {
-        if (gMISMethod == kMISTalbot) gOutputReservoirs[centerReservoirId] = gInputReservoirs[centerReservoirId];
-        else gOutputReservoirs[centerReservoirId] = output;
+        if (gMISMethod == kMISTalbot) gOutputReservoirs[pixelId] = gInputReservoirs[pixelId];
+        else gOutputReservoirs[pixelId] = output;
 
     #if MAX_BOUNCES > 1
         writeExtraBounceReservoirs(output, output.extraBounceStartId, output.extraBounceStartId);

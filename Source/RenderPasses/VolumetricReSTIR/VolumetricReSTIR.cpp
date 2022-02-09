@@ -738,7 +738,6 @@ void VolumetricReSTIR::execute(RenderContext* pRenderContext, const RenderData& 
             vars["gVBuffer"] = mVBuffer;
 
         finalOptions.setShaderData(vars["CB"]["gSamplingOptions"]);
-        r2Params.setShaderData(vars["CB"]["gR2Params"]);
 
         vars["CB"]["gResolution"] = uint2(scrWidth, scrHeight);
         vars["CB"]["gNumTotalRounds"] = numTotalRounds;
@@ -1036,7 +1035,10 @@ void VolumetricReSTIR::renderUI(Gui::Widgets& widget)
 
             dirty |= widget.checkbox("Use Volume Path Tracing", mParams.mUseReference);
             widget.tooltip("Switch to baseline (volume path tracing).");
-            dirty |= widget.var("Volume Path Tracing spp", mParams.mBaselineSamplePerPixel, 1, 32);
+            if (mParams.mUseReference)
+            {
+                dirty |= widget.var("Volume Path Tracing spp", mParams.mBaselineSamplePerPixel, 1, 32);
+            }
 
             dirty |= widget.checkbox("use environment lights", mParams.mUseEnvironmentLights);
             dirty |= widget.checkbox("use analytic lights", mParams.mUseAnalyticLights);
@@ -1052,23 +1054,27 @@ void VolumetricReSTIR::renderUI(Gui::Widgets& widget)
             dirty |= widget.var("M", mParams.mInitialM, 1, 32);
 
             dirty |= widget.var("Initial Tracking Mip Level", mParams.mInitialBaseMipLevel, 0, mpScene->getVolumeNumMips() - 1);
-            widget.tooltip("Volume mip-map level used for analytical tracking to produce the initial samples.");
-            dirty |= widget.var("Light Mip Level", mParams.mInitialLightingMipLevel, 0, mpScene->getVolumeNumMips() - 1);
+            widget.tooltip("Volume mip-map level used for regular tracking to produce the initial samples.");
+            dirty |= widget.var("NEE Transmittance Mip Level", mParams.mInitialLightingMipLevel, 0, mpScene->getVolumeNumMips() - 1);
             widget.tooltip("Volume mip-map level used for estimate the light transmittance of the initial samples.");
 
-            dirty |= widget.checkbox("Use Linear Reg Tracking", mParams.mInitialVisibilityUseLinearSampler);
-            dirty |= widget.checkbox("Light Use Linear Sampler", mParams.mInitialLightingUseLinearSampler);
+            dirty |= widget.checkbox("Use Trilinear Reg Tracking", mParams.mInitialVisibilityUseLinearSampler);
+            widget.tooltip("Regular tracking with trilinear density (more expensive).");
+            dirty |= widget.checkbox("NEE Transmittance Use Linear Sampler", mParams.mInitialLightingUseLinearSampler);
+            widget.tooltip("Use trilinearly filtered density for estimating transmittance.");
 
-
-            dirty |= widget.var("Vis T Step Scale (for features)", mParams.mInitialVisibilityTStepScale, 1.f, 10.f);
-            dirty |= widget.var("Light T Step Scale", mParams.mInitialLightingTStepScale, 1.f, 10.f);
+            //dirty |= widget.var("Vis T Step Scale (for total transmittance)", mParams.mInitialVisibilityTStepScale, 1.f, 10.f);
+            dirty |= widget.checkbox("Use Coarser Grid for Reg Tracking Indirect Bounces", mParams.mInitialUseCoarserGridForIndirectBounce);
+            widget.tooltip("Use Initial Tracking Mip Level + 1 for bounce > 0");
+            dirty |= widget.var("NEE Transmittance T Step Scale", mParams.mInitialLightingTStepScale, 1.f, 10.f);
+            widget.tooltip("Step size (X times voxel size) in ray marching.");
 
             dirty |= widget.checkbox("Use Russian Roulette", mParams.mInitialUseRussianRoulette);
 
-            dirty |= widget.checkbox("Use Coarser Grid for Indirect", mParams.mInitialUseCoarserGridForIndirectBounce);
 
             bool computeTL = mParams.mInitialLightSamples == 0 ? false : true;
-            bool changed = widget.checkbox("Compute Light Transmittance", computeTL);
+            bool changed = widget.checkbox("Compute NEE Transmittance", computeTL);
+            widget.tooltip("Use volumetric shadow in target PDF for initial resampling");
             if (changed) mParams.mInitialLightSamples = computeTL ? 1 : 0;
             dirty |= changed;
 
@@ -1076,7 +1082,7 @@ void VolumetricReSTIR::renderUI(Gui::Widgets& widget)
                 Gui::DropdownList op;
 
                 uint32_t temp = mParams.mInitialLightingTrackingMethod - kAnalyticTracking;
-                op.push_back({ 0, "Analytic" });
+                op.push_back({ 0, "Regular" });
                 op.push_back({ 1, "Ray Marching" });
                 dirty |= widget.dropdown("Light Tracking Method", op, temp);
 				mParams.mInitialLightingTrackingMethod = temp + kAnalyticTracking;
@@ -1089,33 +1095,34 @@ void VolumetricReSTIR::renderUI(Gui::Widgets& widget)
         if (group__.open())
         {
             {
-                dirty |= widget.var("Vis Mip Level", mParams.mSpatialVisibilityMipLevel, 0, mpScene->getVolumeNumMips() - 1);
+                dirty |= widget.var("Transmittance Mip Level", mParams.mSpatialVisibilityMipLevel, 0, mpScene->getVolumeNumMips() - 1);
                 widget.tooltip("Shared volume mip-map level used for primary visibility resampling for spatial/temporal neighbors.");
-                dirty |= widget.var("Light Mip Level", mParams.mSpatialLightingMipLevel, 0, mpScene->getVolumeNumMips() - 1);
+                dirty |= widget.var("NEE Transmittance Mip Level", mParams.mSpatialLightingMipLevel, 0, mpScene->getVolumeNumMips() - 1);
                 widget.tooltip("Shared volume mip-map level used for light transmittance resampling for spatial/temporal neighbors.");
             }
 
             {
-                dirty |= widget.checkbox("Vis Use Linear Sampler", mParams.mSpatialVisibilityUseLinearSampler);
-                dirty |= widget.checkbox("Light Use Linear Sampler", mParams.mSpatialLightingUseLinearSampler);
+                dirty |= widget.checkbox("Transmittance Use Linear Sampler", mParams.mSpatialVisibilityUseLinearSampler);
+                dirty |= widget.checkbox("NEE Transmittance Use Linear Sampler", mParams.mSpatialLightingUseLinearSampler);
             }
 
             {
-                dirty |= widget.var("Vis T Step Scale", mParams.mSpatialVisibilityTStepScale, 1.f, 10.f);
-                dirty |= widget.var("Light T Step Scale", mParams.mSpatialLightingTStepScale, 1.f, 10.f);
+                dirty |= widget.var("Transmittance T Step Scale", mParams.mSpatialVisibilityTStepScale, 1.f, 10.f);
+                dirty |= widget.var("NEE Transmittance T Step Scale", mParams.mSpatialLightingTStepScale, 1.f, 10.f);
+                widget.tooltip("Step size (X times voxel size) in ray marching.");
             }
 
 
             {
                 Gui::DropdownList op;
-                op.push_back({ 0, "Analytic" });
+                op.push_back({ 0, "Regular" });
                 op.push_back({ 1, "Ray Marching" });
 
                 uint32_t tempVis = mParams.mSpatialVisibilityTrackingMethod - kAnalyticTracking;
                 uint32_t tempLight = mParams.mSpatialLightingTrackingMethod - kAnalyticTracking;
 
-                dirty |= widget.dropdown("Vis Tracking Method", op, tempVis);
-                dirty |= widget.dropdown("Light Tracking Method", op, tempLight);
+                dirty |= widget.dropdown("Transmittance Tracking Method", op, tempVis);
+                dirty |= widget.dropdown("NEE Transmittance Tracking Method", op, tempLight);
 
                 mParams.mSpatialVisibilityTrackingMethod = tempVis + kAnalyticTracking;
                 mParams.mSpatialLightingTrackingMethod = tempLight + kAnalyticTracking;
@@ -1160,10 +1167,9 @@ void VolumetricReSTIR::renderUI(Gui::Widgets& widget)
 
             {
                 Gui::DropdownList op;
-                op.push_back({ 0, "Linear Reprojection" });
+                op.push_back({ 0, "Reproject with Velocity Resampling" });
                 op.push_back({ 1, "No Reprojection" });
-                op.push_back({ 2, "No Background Reprojection" });
-                op.push_back({ 3, "ReprojectionLinearNoVelocity" });
+                op.push_back({ 2, "Reproject without Velocity Resampling" });
                 dirty |= widget.dropdown("Reprojection Mode", op, mParams.mTemporalReprojectionMode);
             }
 
@@ -1191,8 +1197,13 @@ void VolumetricReSTIR::renderUI(Gui::Widgets& widget)
                 op.push_back({ 3, "Residual Ratio Tracking" });
                 op.push_back({ 4, "Analog Residual Ratio Tracking" });
 
-                dirty |= widget.dropdown("Vis Tracking Method", op, mParams.mFinalVisibilityTrackingMethod);
-                dirty |= widget.dropdown("Light Tracking Method", op, mParams.mFinalLightTrackingMethod);
+                dirty |= widget.dropdown("Transmittance Tracking method", op, mParams.mFinalVisibilityTrackingMethod);
+                if (!(mParams.mFinalVisibilityTrackingMethod == kAnalyticTracking || mParams.mFinalVisibilityTrackingMethod == kRayMarching))
+                    dirty |= widget.var("Transmittance samples", mParams.mFinalVisibilitySamples, 1, 16);
+
+                dirty |= widget.dropdown("NEE transmittance tracking method", op, mParams.mFinalLightTrackingMethod);
+                if (!(mParams.mFinalLightTrackingMethod == kAnalyticTracking || mParams.mFinalLightTrackingMethod == kRayMarching))
+                    dirty |= widget.var("NEE transmittance samples", mParams.mFinalLightSamples, 1, 16);
             }
 
             group5.release();

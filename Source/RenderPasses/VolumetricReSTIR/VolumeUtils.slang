@@ -9,8 +9,6 @@ import Experimental.Scene.Lights.LightHelpers;
 __exported import InlineRayTracingHelpers;
 __exported import Experimental.Scene.Material.MaterialShading;
 
-//import Utils.Debug.PixelDebug;
-
 bool sampleSceneLights(const EnvMapSampler envMapSampler, const EmissiveLightSampler emissiveSampler, const float3 rayOrigin, bool kUseEnvironmentLights, bool kUseAnalyticLights, bool kUseEmissiveLights,
     inout SampleGenerator sg, out SceneLightSample ls, out int outLightIndex, out float2 outLightUV, float3 surfaceNormal = float3(0.f))
 {
@@ -327,7 +325,6 @@ void SampleMediumSuperVoxelGeneric(Ray rWorld, inout SampleGenerator sg, inout M
     mi = adapter.mi;
 }
 
-// use Linear Sampler
 float MediumTrResidualRatioTrackingGeneric(Ray rWorld, int mipLevel, inout SampleGenerator sg, bool useAnalogResidual, bool useGlobalMajorant)
 {
     ResidualRatioTrackingGVDBAdapter adapter;

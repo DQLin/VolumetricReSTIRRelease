@@ -30,5 +30,4 @@ static const int kPrevFrameExtraGridOffset = 11;
 static const int kReprojectionLinear = 0;
 static const int kReprojectionNone = 1;
 static const int kReprojectionNoBackground = 2;
-static const int kReprojectionLinearNoVelocity = 3;
 

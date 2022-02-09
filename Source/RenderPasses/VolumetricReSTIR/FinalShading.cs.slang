@@ -50,7 +50,6 @@ cbuffer CB
     bool    gSpatialReuse;
     bool    gUseReference;
     int     gMaxBounces;
-    R2Params gR2Params;
     bool    gVisualizeTotalTransmittance;
     bool    gNoReuse;
     SamplingOptions gSamplingOptions;
@@ -76,17 +75,11 @@ void main(uint3 DTid : SV_DispatchThreadID)
     dataProvider.data = gCurExtraBounceReservoirs;
 
     uint2 pixelPos = DTid.xy;
-    printSetPixel(pixelPos);
-
-    int2 Resolution = gResolution;
-    int finalReservoirSubsampleRate = 1;
-    int reservoirIdOffset = 0;
-
-    int r2TimeSeed = (gFrameCount * (gR2Params.numSpatialReuseTotalRounds + 1) + gR2Params.numSpatialReuseTotalRounds) % gR2Params.modFrames;
+    //printSetPixel(pixelPos);
 
     if (any(DTid.xy >= gResolution)) return;
 
-    uint pixelId = pixelPos.y * Resolution.x + pixelPos.x;
+    uint pixelId = pixelPos.y * gResolution.x + pixelPos.x;
 
     float3 outputColor = 0;
 
@@ -112,7 +105,7 @@ void main(uint3 DTid : SV_DispatchThreadID)
         {
             //// background
             float3 rayOrigin = gScene.camera.getPosition();
-            float3 rayDir = normalize(gScene.camera.computeNonNormalizedRayDirPinholeScaled(DTid.xy, finalReservoirSubsampleRate, 0.5f, gResolution));
+            float3 rayDir = normalize(gScene.camera.computeNonNormalizedRayDirPinholeScaled(DTid.xy, 1, 0.5f, gResolution));
 
             Ray ray = { rayOrigin, rayDir, 0, curReservoir.depth };
 
