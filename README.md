@@ -30,7 +30,7 @@ To reproduce the performance in the paper:
 ![](Screenshot.png)
 
 ## Fetch example scenes
-- Download the example scenes (7.87 GB) [here](https://drive.google.com/file/d/1sPnbIobsVeIMLxFKVzzL_H8mVKKf30Um/view?usp=sharing)
+- Download the example scenes (7.87 GB) [here](https://drive.google.com/file/d/1oo29EuEN4TputF6JGTJYze_e08uDRbpx/view?usp=sharing)
 and extract the zip file inside `Bin\x64\Release\Data`
 - You can also extract the zip file inside `Source\RenderPasses\VolumetricReSTIR\Data`. In this way, every time the project VolumetricReSTIR is built, the content will be pasted into the 
 binary folder of your build configuration
