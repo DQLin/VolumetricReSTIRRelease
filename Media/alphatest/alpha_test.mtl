@@ -1,0 +1,8 @@
+newmtl alphamat
+    Ns 100
+    d 1
+    Tr 1
+    Tf 1 1 1
+    illum 2
+    Ka 0.0000 0.0000 0.0000
+    map_Kd T_Boston_Fern_Leaflets_1_BaseColor.png

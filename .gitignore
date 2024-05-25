@@ -13,11 +13,8 @@ Bin/*
 *slang-dump-*
 *.mp4
 packages
-Source/Externals/.packman/*
-!Source/Externals/.packman/GLM
 Source/Externals/openvdb/lib/Debug/*.pdb
 Source/RenderPasses/VolumetricReSTIR/Data
-Media
 Tools/.packman
 Tests/data
 enc_temp_folder
