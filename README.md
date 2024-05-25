@@ -7,7 +7,7 @@
 There are also modifications in the original Falcor 4.2 code to support GVDB volumes. See README_Falcor.md for the original 
 README file provided by Falcor.
 - Some example scripts are provided to show how the method works in different scenes. "RunDemo.bat" contains a list of these scripts.
-- Before running the scripts, you need to compile the program and download the scene files following the instruction below.
+- Before running the scripts, you need to compile the program and **download the scene files** following the instruction below.
 
 ## Prerequisites
 - Windows 10 version 1809 or newer
@@ -23,17 +23,17 @@ To reproduce the performance in the paper:
 ## How to compile
 - Open Falcor.sln and Build Solution in configuration ReleaseD3D12
 
-## Run the demo
-- execute RunDemo.bat (you can edit the script to select what you want to run)
-- an example screenshot
-
-![](Screenshot.png)
-
 ## Fetch example scenes
 - Download the example scenes (7.87 GB) [here](https://drive.google.com/file/d/1oo29EuEN4TputF6JGTJYze_e08uDRbpx/view?usp=sharing)
 and extract the zip file inside `Bin\x64\Release\Data`
 - You can also extract the zip file inside `Source\RenderPasses\VolumetricReSTIR\Data`. In this way, every time the project VolumetricReSTIR is built, the content will be pasted into the 
 binary folder of your build configuration
+
+## Run the demo
+- execute RunDemo.bat (you can edit the script to select what you want to run)
+- an example screenshot
+
+![](Screenshot.png)
 
 ## Prepare GVDB asset (.vbx files)
 - run `GVDBConverter\gImportVDB.exe [Your VDB file].vdb [Number of Mip Levels]`
