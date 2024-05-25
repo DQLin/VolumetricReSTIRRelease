@@ -9,9 +9,6 @@
     <dependency name="dear_imgui" linkPath="../Externals/.packman/dear_imgui">
         <package name="dear_imgui" version="1.72WIP-docking-e5b9054" />
     </dependency>
-    <dependency name="glm" linkPath="../Externals/.packman/GLM">
-        <package name="glm" version="0.9.9.2" />
-    </dependency>
     <dependency name="ffmpeg" linkPath="../Externals/.packman/FFMPEG">
         <package name="ffmpeg" version="3.4.2" platforms="win" />
     </dependency>

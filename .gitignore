@@ -14,6 +14,7 @@ Bin/*
 *.mp4
 packages
 Source/Externals/.packman/*
+!Source/Externals/.packman/GLM
 Source/Externals/openvdb/lib/Debug/*.pdb
 Source/RenderPasses/VolumetricReSTIR/Data
 Media
