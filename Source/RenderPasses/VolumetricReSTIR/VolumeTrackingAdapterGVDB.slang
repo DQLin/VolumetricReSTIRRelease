@@ -54,7 +54,7 @@ struct MediumTrAnalyticAdapterGVDB : IVolumeTrackingAdapterGVDB
 
         dda_leaf.PrepareLeaf(vmin_leaf);
 
-        for (int iter = 0; iter < MAX_BRICK_STEPS && all(dda_leaf.p >= 0 && dda_leaf.p < gvdb.res[mipLevel * 3]); iter++)
+        for (int iter = 0; iter < MAX_BRICK_STEPS && all(dda_leaf.p >= 0) && all(dda_leaf.p < gvdb.res[mipLevel * 3]); iter++)
         {
             // compute the next step location, but don't step yet
             dda_leaf.Next();
@@ -181,7 +181,7 @@ struct MediumTrRayMarchingAdapterGVDB : IVolumeTrackingAdapterGVDB
             float3 p = wp - vmin_leaf;					// Sample point in sub-volume (in units of voxels)
             const float3 wpt = tStepMultipler * tStep * ray.dir;
 
-            for (int iter = 0; iter < MAX_BRICK_STEPS && all(p >= 0 && p < gvdb.res[mipLevel * 3]); iter++)
+            for (int iter = 0; iter < MAX_BRICK_STEPS && all(p >= 0) && all(p < gvdb.res[mipLevel * 3]); iter++)
             {
                 if (t >= tFar)
                 {
@@ -271,7 +271,7 @@ struct SampleMediumAnalyticAdapterGVDB : IVolumeTrackingAdapterGVDB
         HDDAState dda_leaf = dda;
         dda_leaf.PrepareLeaf(vmin_leaf);
 
-        for (int iter = 0; iter < MAX_BRICK_STEPS && all(dda_leaf.p >= 0 && dda_leaf.p < gvdb.res[mipLevel * 3]); iter++)
+        for (int iter = 0; iter < MAX_BRICK_STEPS && all(dda_leaf.p >= 0) && all(dda_leaf.p < gvdb.res[mipLevel * 3]); iter++)
         {
             // compute the next step location, but don't step yet
             dda_leaf.Next();
@@ -472,7 +472,7 @@ struct SampleVolumeCellByDensityAdapterGVDB : IVolumeTrackingAdapterGVDB
         HDDAState dda_leaf = dda;
         dda_leaf.PrepareLeaf(vmin_leaf);
 
-        for (int iter = 0; iter < MAX_BRICK_STEPS && all(dda_leaf.p >= 0 && dda_leaf.p < gvdb.res[mipLevel * 3]); iter++)
+        for (int iter = 0; iter < MAX_BRICK_STEPS && all(dda_leaf.p >= 0) && all(dda_leaf.p < gvdb.res[mipLevel * 3]); iter++)
         {
             // find density
             float density = DensityInAtlas(dda_leaf.p + o + 0.5f, mipLevel, false);
@@ -561,7 +561,7 @@ struct ReservoirFeatureRayMarchingAdapterGVDB : IVolumeTrackingAdapterGVDB
         float3 p = wp - vmin_leaf;					// Sample point in sub-volume (in units of voxels)
         const float3 wpt = tStep * ray.dir;
 
-        for (int iter = 0; iter < MAX_BRICK_STEPS && all(p >= 0 && p < gvdb.res[mipLevel * 3]); iter++)
+        for (int iter = 0; iter < MAX_BRICK_STEPS && all(p >= 0) && all(p < gvdb.res[mipLevel * 3]); iter++)
         {
             float curTransmittance = exp(Tr);
             if (curTransmittance < 0.01f)

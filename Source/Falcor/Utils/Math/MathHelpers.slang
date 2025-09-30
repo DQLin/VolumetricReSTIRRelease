@@ -127,7 +127,7 @@ float3 latlong_map_to_world(float2 uv)
 */
 float2 oct_wrap(float2 v)
 {
-    return (1.f - abs(v.yx)) * (v.xy >= 0.f ? 1.f : -1.f);
+    return (1.f - abs(v.yx)) * float2(v.x >= 0.f ? 1.f : -1.f, v.y >= 0.f ? 1.f : -1.f);
 }
 
 /** Converts normalized direction to the octahedral map (non-equal area, signed normalized).

@@ -135,7 +135,7 @@ void main(uint3 DTid : SV_DispatchThreadID)
 
     pixelPos = DTid.xy;
 
-    if (any(isnan(curColor) || isinf(curColor))) curColor = 0.f;
+    if (any(isnan(curColor)) || any(isinf(curColor))) curColor = 0.f;
 
     gOutputFrame[pixelPos] = curColor;
 }

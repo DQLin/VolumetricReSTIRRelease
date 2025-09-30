@@ -40,6 +40,9 @@ namespace Falcor
             StructuredBuffer = 2,
         };
 
+        // static_assert must depend on template parameter, otherwise it will be evaluated before template instantiation (and always evaluate false)
+        template <Type...> inline constexpr bool alwaysFalse = false;
+
         template <Type type>
         void testBuffer(GPUUnitTestContext& ctx, uint32_t numElems, uint32_t index = 0, uint32_t count = 0)
         {
@@ -63,7 +66,7 @@ namespace Falcor
             if constexpr (type == Type::ByteAddressBuffer) pBuffer = Buffer::create(numElems * sizeof(uint32_t), ResourceBindFlags::UnorderedAccess, Buffer::CpuAccess::None);
             else if constexpr (type == Type::TypedBuffer) pBuffer = Buffer::createTyped<uint32_t>(numElems, ResourceBindFlags::UnorderedAccess);
             else if constexpr (type == Type::StructuredBuffer) pBuffer = Buffer::createStructured(ctx.getProgram(), "buffer", numElems, ResourceBindFlags::UnorderedAccess);
-            else static_assert(false);
+            else static_assert(alwaysFalse);
 
             ctx["buffer"] = pBuffer;
 

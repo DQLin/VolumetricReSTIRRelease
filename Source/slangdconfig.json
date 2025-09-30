@@ -1,0 +1,17 @@
+{
+    "slang.predefinedMacros": [
+        "SAMPLE_GENERATOR_TYPE=SAMPLE_GENERATOR_UNIFORM",
+
+        "MAX_BOUNCES=2",
+        "SURFACE_SCENE",
+        "VBUFFERDECLARE=VBufferItem vItem,",
+        "VBUFFERITEM=vItem,",
+        "VERTEX_REUSE",
+        "REUSETYPE=inout"
+
+    ],
+    "slang.additionalSearchPaths": [
+        "./",
+        "./Falcor"
+    ]
+}
